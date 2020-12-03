@@ -36,9 +36,44 @@
 
 		</ul>
     </div>
-    <div id= "workout-plan">
-
+    <div class="field">
+        <label class="label">Make a New Plan!</label>
+        <div class="control">
+          <input class="plan input" type="text" placeholder="Text input">
+        </div>
+        <p class="help">This is a help text</p>
+        <button id ="submit-button" class="button is-primary">Submit</button>
     </div>
+
+    <div class = "content">
+        <h2> Workout Plans </h2>
+        <ul id= "plans-list">
+
+        </ul>
+    </div>
+
+    <div class="modal">
+      <div class="modal-background"></div>
+      <div class="modal-card">
+        <header class="modal-card-head">
+          <p class="modal-card-title">Add Exercise To One of Your Plans!</p>
+          <button class="delete" aria-label="close"></button>
+        </header>
+        <section class="modal-card-body">
+          <div class="select is-multiple">
+            <select multiple size="5">
+            </select>
+          </div>
+          <!-- Content ... -->
+        </section>
+        <footer class="modal-card-foot">
+          <button id= "add" class="button is-success">Add Exercise</button>
+          <button id = "cancel" class="button">Cancel</button>
+        </footer>
+      </div>
+    </div>
+
+
 	<script  src="./index.js"></script>
   </section>
   </body>
