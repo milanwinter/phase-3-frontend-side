@@ -4,11 +4,75 @@ document.addEventListener("DOMContentLoaded", () => {
     const exerciseTable = document.querySelector("tbody")
     const exerciseDiv = document.querySelector("#exercise-panel")
     const planButton = document.querySelector("#submit-button")
-    const input = document.querySelector(".input")
+    const input = document.querySelector("#plan-input")
     const planList = document.querySelector("#plans-list")
+    const plansDiv = document.querySelector("#plans")
+    let currentUser = ""
+
+
+    plansDiv.addEventListener("click",handlePlanClick)
+
+    //Everything to do with the login Modal Box --------------------------------------------
+
+    const loginModal = document.querySelector("#login")
+    const loginButton = document.querySelector("#login-button")
+    const usernameInput = document.querySelector("#user-input")
+    const emailInput = document.querySelector("#email-input")
+     loginModal.style.display = "block"
+
+    
+    loginButton.addEventListener("click", createLoginUser)
+
+
+    function createLoginUser(e) {
+        e.preventDefault()
+        const username = usernameInput.value
+        const email = emailInput.value
+        
+        fetch("http://localhost:3000/users",{
+            method: "POST",
+            headers: {
+                "Content-type":"application/json",
+                "Accept":"application/json"
+            },
+            body: JSON.stringify({
+                username: username,
+                email: email
+            })
+        })
+            .then(resp => resp.json())
+            .then(json => {
+                handleUserResponse(json)
+            })
+        
+    }
+
+    function handleUserResponse(res) {
+        if (res.error) {
+            alert("Incorrect Credentials Try again")
+
+        } else {
+           
+            currentUser = res.id
+            // alert(`Welcome ${res.user_name}`)
+            loginModal.style.display = "none"
+            fetchWorkoutPlans()
+
+        }
+    }
+    
+    //End of the Login Modal Box Stuff ========================================================================
+
+
+
+
+
+
+
+
 
     // Everything to do with the exercise modal box------------------------------------------
-    const exerciseModal = document.querySelector(".modal")
+    const exerciseModal = document.querySelector("#Exercises")
     const exerciseModalBody = document.querySelector(".modal-card-body")
     const exerciseModalClose = document.querySelector('.delete')
     const exerciseModalCancel = document.querySelector("button#cancel")
@@ -22,12 +86,16 @@ document.addEventListener("DOMContentLoaded", () => {
     })
     exerciseModalCancel.addEventListener("click", () => {
         exerciseModal.style.display = 'none'
-    })
-
     
+    })
+    exerciseModalAddBtn.addEventListener("click", addExerciseToPlan)
+    
+    /// End of the modal box Stuff ==============================================================
 
 
-    /// End of the modal box Stuff ---------------------------------------------
+
+
+
 
 
     exerciseDiv.addEventListener("click", (e) => handleEvent(e))
@@ -35,7 +103,7 @@ document.addEventListener("DOMContentLoaded", () => {
     //these will run when page loads
 
     fetchExercises()
-    fetchWorkoutPlans()
+    // fetchWorkoutPlans()
 
 
     // fetching all exercises with thse next 3 functions ///
@@ -47,11 +115,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function displayExercises(exercises) {
         exercises.forEach(exercise => {
-            createNewExercise(exercise)
-        });
+            displaySingleExercise(exercise)
+        })
     }
 
-    function createNewExercise(ex) {
+    function displaySingleExercise(ex) {
         const tr = document.createElement("tr")
         const name = document.createElement("td")
         const description = document.createElement("td")
@@ -74,7 +142,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     }
 
-
+    // End of fetching/creating Exercises =============================================================
 
 
 
@@ -87,9 +155,10 @@ document.addEventListener("DOMContentLoaded", () => {
             const id = e.target.dataset.exerciseId
             exerciseModal.style.display = 'block'
             addExerciseModalOptions()
+            exerciseModal.dataset.exerciseId = id
 
 
-            exerciseModalAddBtn.addEventListener("click", () => addExerciseToPlan(e, id) )
+            // exerciseModalAddBtn.addEventListener("click", () => addExerciseToPlan(e, id) )
 
             // fetch("http://localhost:3000/workout_plans", {
             //     method: "POST",
@@ -114,20 +183,26 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function createOptions(plans) {
-        plans.forEach((plan) => {
-            const option = document.createElement("option")
-            option.value = plan.name
-            option.innerText = plan.name
-            option.dataset.planId = plan.id
-            exerciseModalSelect.appendChild(option)
-        })
+        exerciseModalSelect.innerHTML = ""
+        let userPlans = plans.filter(plan => plan.user_id === currentUser)
+            if (userPlans.length > 0) {
+                userPlans.forEach( 
+                (plan) => {
+                const option = document.createElement("option")
+                option.value = plan.name
+                option.innerText = plan.name
+                option.dataset.planId = plan.id
+                exerciseModalSelect.appendChild(option)
+                })
+            } else {
+                exerciseModalBody.innerText = "No Plans Made yet, Create one so you can add exercises dummy"
+            }
+
     }
     
-    function addExerciseToPlan(e, id) {
-        console.log("before")
-        console.log(id)
-        console.log("after")
-        plan = exerciseModalSelect.value
+    function addExerciseToPlan() {
+        const id = exerciseModal.dataset.exerciseId
+        const plan = exerciseModalSelect.value
          fetch("http://localhost:3000/workout_exercises", {
                 method: "POST",
                 headers: {
@@ -149,7 +224,7 @@ document.addEventListener("DOMContentLoaded", () => {
     
 
 
-    /// end of adding exercises --------------------------------------------
+    /// end of adding exercises ===============================================================
 
 
 
@@ -160,8 +235,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Adding Plans Down below ------------------------------------------------------>
 
     function addPlan(e) {
-        console.log(e.target)
-        console.log(input.value)
+       
        fetch("http://localhost:3000/workout_plans", {
            method: "POST",
            headers: {
@@ -169,11 +243,14 @@ document.addEventListener("DOMContentLoaded", () => {
                "Accept": "application/json"
            },
            body: JSON.stringify({
-               name: input.value
+               name: input.value,
+               userId: currentUser
            })
        })
         .then(resp => resp.json())
-        .then(json => displayPlans(json))
+        .then(json => {
+            fetchWorkoutPlans()
+        })
         
     }
 
@@ -184,31 +261,68 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function displayPlans(plans) {
+        let userPlans = plans.filter(plan =>  plan.user_id === currentUser)
         planList.innerHTML = ""
-        plans.forEach((plan) => {
-            displaySinglePlan(plan)
-        })
+        if(userPlans.length > 0) {
+            userPlans.forEach((plan) => {
+                plan.user_id === currentUser
+                    displaySinglePlan(plan)
+            
+            })
+        } else {
+            planList.innerHTML = "No Plans Yet, Try to Make one!"
+        }
     }
 
     function displaySinglePlan(plan) {
        
         const bigLi = document.createElement("li")
-        const ol = document.createElement("ul")
-        const li = document.createElement("li")
+        const ul = document.createElement("ul")
         bigLi.innerText = plan.name
+        bigLi.dataset.planId = plan.id
         if (plan.exercises && plan.exercises.length > 0) {
             plan.exercises.forEach((exercise) => {
-
-                li.innerText = exercise.name
+                const li = document.createElement("li")
+                li.innerText = exercise.name + "     "
+                li.dataset.exerciseId = exercise.id
+                const deleteButton = document.createElement("button")
+                deleteButton.innerText = "delete"
+                deleteButton.className = "delete is-medium has-background-danger"
+                li.appendChild(deleteButton)
+                ul.appendChild(li)
             })
         } else {
+            const li = document.createElement("li")
             li.innerText = "No Exercises for this plan yet, add some!"
+            ul.appendChild(li)
         }
 
-        ol.appendChild(li)
-        bigLi.appendChild(ol)
+        bigLi.appendChild(ul)
         planList.appendChild(bigLi)
     }
 
-    /// end of adding plans ------------------------------------------------------>
+    function handlePlanClick(e) {
+        console.log(e.target)
+        const exerciseId = e.target.parentNode.dataset.exerciseId
+        const planId =  e.target.parentNode.parentNode.parentNode.dataset.planId
+        
+        if (e.target.className === "delete is-medium has-background-danger") {
+            console.log(exerciseId)
+            console.log(planId)
+            fetch("http://localhost:3000/workout_plans", {
+                method: "DESTROY",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept" : "application/json"
+                },
+                body: JSON.stringify({
+                    exerciseId: exerciseId,
+                    planId: planId
+                })
+            })
+            
+        }
+    }
+
+    /// end of adding plans ==========================================================
 })

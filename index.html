@@ -10,7 +10,7 @@
   <section class="section">
     <div class="container">
       <h1 class="title">
-        Workout App!!
+        Welcome to the Workout App!!
       </h1>
       <p class="subtitle">
         Lets get started and <strong>Workout</strong>!
@@ -39,20 +39,79 @@
     <div class="field">
         <label class="label">Make a New Plan!</label>
         <div class="control">
-          <input class="plan input" type="text" placeholder="Text input">
+          <input class="plan input" id="plan-input" type="text" placeholder="Text input">
         </div>
         <p class="help">This is a help text</p>
         <button id ="submit-button" class="button is-primary">Submit</button>
     </div>
 
-    <div class = "content">
-        <h2> Workout Plans </h2>
+    <div class = "content" id= "plans">
+        <h2> Your Workout Plans </h2>
         <ul id= "plans-list">
 
         </ul>
     </div>
 
-    <div class="modal">
+    
+          <div class="modal" id="login"> 
+            <div class="modal-background"></div> 
+            <div class="modal-content"> 
+              <div class="box"> 
+                <div> 
+                  <h1 class='title has-text-centered'> 
+                    Signup/Login 
+                  </h1> 
+                </div> 
+                <form action='#' method='post'> 
+                  <div class='field'> 
+                    <label class='label'
+                           id='username'> 
+                      Username 
+                    </label> 
+                    <div class='control has-icons-left'> 
+                      <input class='input'
+                              id="user-input"
+                             type='text'
+                             name='username' 
+                             placeholder='Username'> 
+                      <span class="icon is-small is-left"> 
+                        <i class="fas fa-user"></i> 
+                      </span> 
+                    </div> 
+                  </div> 
+    
+                  <div class='field'> 
+                    <label class='label' 
+                           id='email'> 
+                      Email 
+                    </label> 
+                    <div class='control has-icons-left'> 
+                      <input class='input'
+                              id = "email-input"
+                             type='text'
+                             name="email"
+                             placeholder='Email'> 
+                      <span class="icon is-small is-left"> 
+                        <i class="fas fa-lock"></i> 
+                      </span> 
+                    </div> 
+    
+                    <div class='buttons'> 
+                      <button id="login-button" class='button is-link'> 
+                        Signup/Login 
+                      </button> 
+                    </div> 
+                  </div> 
+                </form> 
+              </div> 
+            </div> 
+            <button class="modal-close is-large"
+                    aria-label="close"> 
+              Model 
+            </button> 
+          </div> 
+    
+    <div class="modal" id="Exercises">
       <div class="modal-background"></div>
       <div class="modal-card">
         <header class="modal-card-head">
@@ -72,6 +131,8 @@
         </footer>
       </div>
     </div>
+
+
 
 
 	<script  src="./index.js"></script>
